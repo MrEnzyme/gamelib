@@ -2,7 +2,7 @@ package gamelib.networking
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 
-class ReplicatedField[+A: Manifest](getValue: () => A, setValue: A => Unit)
+class ReplicatedField[+A](getValue: () => A, setValue: A => Unit)
 {
 	def writeValue(out: Output) = getValue() match
 	{
