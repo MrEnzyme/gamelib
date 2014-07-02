@@ -1,4 +1,4 @@
-package gamelib.networking
+package gamelib.network
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.Kryo

@@ -1,4 +1,4 @@
-package gamelib.networking
+package gamelib.network
 
 import scala.collection.mutable.{LinkedHashMap, LinkedHashSet, Queue}
 import com.esotericsoftware.kryo.io.{Input, Output}

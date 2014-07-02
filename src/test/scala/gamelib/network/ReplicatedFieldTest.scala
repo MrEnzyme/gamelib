@@ -1,4 +1,4 @@
-package gamelib.networking
+package gamelib.network
 
 import org.scalatest.FunSuite
 import com.esotericsoftware.kryo.io.{Input, Output}

@@ -1,4 +1,4 @@
-package gamelib.networking
+package gamelib.network
 
 import org.scalatest.FunSuite
 import com.esotericsoftware.kryo.io.{Input, Output}
@@ -24,7 +24,7 @@ class ReplicatedTest extends FunSuite
     instantiator.setRegistrationRequired(false)
     val kryo = instantiator.newKryo()
 
-    test("can correctly read and write all values to kryo streams")
+    test("can correctly read and write all fields to kryo streams")
     {
         //set a bunch of fields in mock1
         val out = new Output(128)
