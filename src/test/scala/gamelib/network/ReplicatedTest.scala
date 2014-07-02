@@ -45,4 +45,27 @@ class ReplicatedTest extends FunSuite
         assert(mock2.integer == 3)
         assert(mock2.double == 4)
     }
+
+    test("can correctly read and write specific fields to kryo streams")
+    {
+        //set a bunch of fields in mock1
+        val out = new Output(128)
+        val mock1 = new MockReplicated
+        mock1.boolean = false
+        mock1.byte = 1
+        mock1.short = 2
+        mock1.integer = 3
+        mock1.double = 4
+        mock1.replicateFields('boolean, 'short, 'double)
+        mock1.writeUpdatedFields(out, kryo)
+
+        //ensure they get replicated to mock2
+        val mock2 = new MockReplicated
+        mock2.readFields(new Input(out.toBytes), kryo)
+        assert(mock2.boolean == false)
+        assert(mock2.byte != 1)
+        assert(mock2.short == 2)
+        assert(mock2.integer != 3)
+        assert(mock2.double == 4)
+    }
 }
