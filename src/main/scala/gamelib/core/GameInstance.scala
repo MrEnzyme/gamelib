@@ -5,26 +5,26 @@ import scala.collection.mutable.SynchronizedQueue
 
 class GameInstance
 {
-	private val gameObjects = new ListBuffer[GameObject]
-	private val newObjects = new SynchronizedQueue[GameObject]
-	private val deadObjects = new ListBuffer[GameObject]
+    private val gameObjects = new ListBuffer[GameObject]
+    private val newObjects = new SynchronizedQueue[GameObject]
+    private val deadObjects = new ListBuffer[GameObject]
 
-	def registerObject(newObject: GameObject) = newObjects.enqueue(newObject)
+    def registerObject(newObject: GameObject) = newObjects.enqueue(newObject)
 
-	def update(deltaTime: Double)
-	{
-		gameObjects ++= newObjects
-		newObjects.clear()
-		deadObjects.clear()
+    def update(deltaTime: Double)
+    {
+        gameObjects ++= newObjects
+        newObjects.clear()
+        deadObjects.clear()
 
-		for(gameObject <- gameObjects)
-		{
-			updateGameObject(gameObject, deltaTime)
-			if(gameObject.isDead) deadObjects += gameObject
-		}
+        for(gameObject <- gameObjects)
+        {
+            updateGameObject(gameObject, deltaTime)
+            if(gameObject.isDead) deadObjects += gameObject
+        }
 
-		gameObjects --= deadObjects
-	}
+        gameObjects --= deadObjects
+    }
 
-	protected def updateGameObject(gameObject: GameObject, deltaTime: Double) = gameObject.update(deltaTime)
+    protected def updateGameObject(gameObject: GameObject, deltaTime: Double) = gameObject.update(deltaTime)
 }

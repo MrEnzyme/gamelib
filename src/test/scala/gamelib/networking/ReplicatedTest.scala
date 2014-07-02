@@ -45,13 +45,4 @@ class ReplicatedTest extends FunSuite
         assert(mock2.integer == 3)
         assert(mock2.double == 4)
     }
-
-    test("serialize random stuff")
-    {
-        val out = new Output(256)
-        kryo.writeObject(out, List(23, 32, 43, 54, 65))
-        val listBack = kryo.readObject(new Input(out.toBytes), classOf[List[Int]])
-        print(listBack)
-        assert(true)
-    }
 }
