@@ -4,8 +4,6 @@ version := "1.0"
 
 scalaVersion := "2.11.1"
 
-exportJars := true
-
 resolvers += "clojars" at "http://clojars.org/repo"
 
 libraryDependencies ++= Seq(
