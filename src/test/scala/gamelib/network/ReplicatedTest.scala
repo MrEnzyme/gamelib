@@ -34,11 +34,11 @@ class ReplicatedTest extends FunSuite
         mock1.short = 2
         mock1.integer = 3
         mock1.double = 4
-        mock1.writeAllFields(out, kryo)
+        mock1.write(out, kryo)
 
         //ensure they get replicated to mock2
         val mock2 = new MockReplicated
-        mock2.readFields(new Input(out.toBytes), kryo)
+        mock2.read(new Input(out.toBytes), kryo)
         assert(mock2.boolean == false)
         assert(mock2.byte == 1)
         assert(mock2.short == 2)
@@ -57,11 +57,11 @@ class ReplicatedTest extends FunSuite
         mock1.integer = 3
         mock1.double = 4
         mock1.replicateFields('boolean, 'short, 'double)
-        mock1.writeUpdatedFields(out, kryo)
+        mock1.writeUpdate(out, kryo)
 
         //ensure they get replicated to mock2
         val mock2 = new MockReplicated
-        mock2.readFields(new Input(out.toBytes), kryo)
+        mock2.read(new Input(out.toBytes), kryo)
         assert(mock2.boolean == false)
         assert(mock2.byte != 1)
         assert(mock2.short == 2)

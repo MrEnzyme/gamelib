@@ -9,7 +9,7 @@ class GameInstance
     private val newObjects = new SynchronizedQueue[GameObject]
     private val deadObjects = new ListBuffer[GameObject]
 
-    def registerObject(newObject: GameObject) = newObjects.enqueue(newObject)
+    def addObject(newObject: GameObject) = newObjects.enqueue(newObject)
 
     def update(deltaTime: Double)
     {
