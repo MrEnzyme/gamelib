@@ -13,18 +13,18 @@ class ReplicatedTest extends FunSuite
         var short: Short = 0
         var integer: Integer = 0
         var double: Double = 0.0
-        registerField[Boolean]('boolean, () => boolean, boolean = _)
-        registerField[Byte]('byte, () => byte, byte = _)
-        registerField[Short]('short, () => short, short = _)
-        registerField[Int]('integer, () => integer, integer = _)
-        registerField[Double]('double, () => double, double = _)
+        replicateField[Boolean]('boolean, boolean, boolean = _)
+        replicateField[Byte]('byte, byte, byte = _)
+        replicateField[Short]('short, short, short = _)
+        replicateField[Int]('integer, integer, integer = _)
+        replicateField[Double]('double, double, double = _)
     }
 
     val instantiator = new ScalaKryoInstantiator
     instantiator.setRegistrationRequired(false)
     val kryo = instantiator.newKryo()
 
-    test("can correctly read and write all fields to kryo streams")
+    test("read and write all fields to kryo streams")
     {
         //set a bunch of fields in mock1
         val out = new Output(128)
@@ -46,7 +46,7 @@ class ReplicatedTest extends FunSuite
         assert(mock2.double == 4)
     }
 
-    test("can correctly read and write specific fields to kryo streams")
+    test("read and write specific fields to kryo streams")
     {
         //set a bunch of fields in mock1
         val out = new Output(128)
@@ -56,7 +56,7 @@ class ReplicatedTest extends FunSuite
         mock1.short = 2
         mock1.integer = 3
         mock1.double = 4
-        mock1.replicateFields('boolean, 'short, 'double)
+        mock1.updateFields('boolean, 'short, 'double)
         mock1.writeUpdate(out, kryo)
 
         //ensure they get replicated to mock2

@@ -10,15 +10,14 @@ trait Replicated
     private val fieldNames = new LinkedHashMap[Symbol, ReplicatedField[Any]]
     private val fieldsToUpdate = new LinkedHashSet[ReplicatedField[Any]]
 
-    final def registerField[A](name: Symbol, get: () => A, set: A => Unit)
+    final def replicateField[A](name: Symbol, get: => A, set: A => Unit)
     {
         val field = new ReplicatedField(get, set)
         fields += field
         fieldNames(name) = field
-        fieldsToUpdate(field) = false
     }
 
-    final def replicateFields(fields: Symbol*) = for(f <- fields) fieldsToUpdate += fieldNames(f)
+    final def updateFields(fields: Symbol*) = for(f <- fields) fieldsToUpdate += fieldNames(f)
     final def clearUpdates() = fieldsToUpdate.clear()
 
     private def writeField(out: Output, kryo: Kryo, field: ReplicatedField[Any])
