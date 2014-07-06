@@ -1,26 +1,40 @@
 package gamelib.network
 
-import scala.collection.mutable.{ListBuffer, LinkedHashMap, LinkedHashSet}
+import scala.collection.mutable.LinkedHashSet
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.Kryo
+import org.reflections.ReflectionUtils._
+import java.lang.reflect.Field
 
 trait Replicated
 {
-    private val fields = new ListBuffer[ReplicatedField[Any]]
-    private val fieldNames = new LinkedHashMap[Symbol, ReplicatedField[Any]]
-    private val fieldsToUpdate = new LinkedHashSet[ReplicatedField[Any]]
-
-    final def replicateField[A](name: Symbol, get: => A, set: A => Unit)
+    class ReplicatedField(instanceField: Field)
     {
-        val field = new ReplicatedField(get, set)
-        fields += field
-        fieldNames(name) = field
+        def writeValue(out: Output, kryo: Kryo) = kryo.writeObject(out, instanceField.get(Replicated.this))
+        def readValue(in: Input, kryo: Kryo) = instanceField.set(Replicated.this, kryo.readObject(in, instanceField.getType))
     }
 
-    final def updateFields(fields: Symbol*) = for(f <- fields) fieldsToUpdate += fieldNames(f)
+    private lazy val fields = fieldNames.values.toSeq
+    private lazy val fieldNames = initFields()
+    private val fieldsToUpdate = new LinkedHashSet[ReplicatedField]
+
+    def initFields(): Map[String, ReplicatedField] =
+    {
+        val newFields = getAllFields(getClass, withAnnotation(classOf[replicate]))
+        val namePairs = for(f <- newFields.toArray) yield
+        {
+            val field = f.asInstanceOf[Field]
+            field.setAccessible(true)
+            val newField = new ReplicatedField(field)
+            field.getAnnotation(classOf[replicate]).value -> newField
+        }
+        namePairs.toMap
+    }
+
+    final def updateFields(fields: String*) = for(f <- fields) fieldsToUpdate += fieldNames(f)
     final def clearUpdates() = fieldsToUpdate.clear()
 
-    private def writeField(out: Output, kryo: Kryo, field: ReplicatedField[Any])
+    private def writeField(out: Output, kryo: Kryo, field: ReplicatedField)
     {
         out.writeByte(fields.indexOf(field))
         field.writeValue(out, kryo)

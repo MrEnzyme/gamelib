@@ -8,16 +8,11 @@ class ReplicatedTest extends FunSuite
 {
     class MockReplicated extends Replicated
     {
-        var boolean: Boolean = true
-        var byte: Byte = 0
-        var short: Short = 0
-        var integer: Integer = 0
-        var double: Double = 0.0
-        replicateField[Boolean]('boolean, boolean, boolean = _)
-        replicateField[Byte]('byte, byte, byte = _)
-        replicateField[Short]('short, short, short = _)
-        replicateField[Int]('integer, integer, integer = _)
-        replicateField[Double]('double, double, double = _)
+        @replicate("bool") var boolean: Boolean = true
+        @replicate("byte") var byte: Byte = 0
+        @replicate("short") var short: Short = 0
+        @replicate("integer") var integer: Integer = 0
+        @replicate("double") var double: Double = 0.0
     }
 
     val instantiator = new ScalaKryoInstantiator
@@ -56,7 +51,7 @@ class ReplicatedTest extends FunSuite
         mock1.short = 2
         mock1.integer = 3
         mock1.double = 4
-        mock1.updateFields('boolean, 'short, 'double)
+        mock1.updateFields("bool", "short", "double")
         mock1.writeUpdate(out, kryo)
 
         //ensure they get replicated to mock2
