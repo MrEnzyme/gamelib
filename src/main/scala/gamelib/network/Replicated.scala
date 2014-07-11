@@ -1,10 +1,10 @@
 package gamelib.network
 
-import scala.collection.mutable.LinkedHashSet
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.esotericsoftware.kryo.Kryo
 import org.reflections.ReflectionUtils._
 import java.lang.reflect.Field
+import scala.collection.mutable
 
 trait Replicated
 {
@@ -16,7 +16,7 @@ trait Replicated
 
     private lazy val fields = fieldNames.values.toSeq
     private lazy val fieldNames = initFields()
-    private val fieldsToUpdate = new LinkedHashSet[ReplicatedField]
+    private val fieldsToUpdate = new mutable.LinkedHashSet[ReplicatedField]
 
     def initFields(): Map[String, ReplicatedField] =
     {

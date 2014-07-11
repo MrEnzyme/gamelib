@@ -1,8 +1,7 @@
 package gamelib.network
 
 import org.scalatest.FunSuite
-import com.esotericsoftware.kryo.io.{Input, Output}
-import com.twitter.chill.ScalaKryoInstantiator
+import com.twitter.chill.{Input, Output, ScalaKryoInstantiator}
 
 class ReplicatedTest extends FunSuite
 {
@@ -15,9 +14,7 @@ class ReplicatedTest extends FunSuite
         @replicate("double") var double: Double = 0.0
     }
 
-    val instantiator = new ScalaKryoInstantiator
-    instantiator.setRegistrationRequired(false)
-    val kryo = instantiator.newKryo()
+    val kryo = (new ScalaKryoInstantiator).newKryo()
 
     test("read and write all fields to kryo streams")
     {
