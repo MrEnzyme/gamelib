@@ -10,15 +10,17 @@ import scala.collection.mutable
 
 class ReplicatedGameInstance(packages: String*) extends GameInstance
 {
+    //stores each replicated object mapped from its unique id
     private val replicatedObjects = new BidirectionalHashMap[Int, ReplicatedGameObject]
     private var replicatedObjectIndex = 0
 
     private val localObjects = new mutable.HashSet[ReplicatedGameObject]
 
-    private val recentCreations = new mutable.LinkedHashSet[ReplicatedGameObject]
-    private val recentDeletions = new mutable.LinkedHashSet[ReplicatedGameObject]
+    //collections of recently created and deleted replicated objects
+    private val recentCreations = new BidirectionalHashMap[Int, ReplicatedGameObject]
+    private val recentDeletions = new BidirectionalHashMap[Int, ReplicatedGameObject]
 
-    //Index all subclasses of Replicated. Their position in the sequence is their unique id used for new instance creation.
+    //Index all subclasses of ReplicatedGameObject. Their position in the sequence is their unique id used for new instance creation.
     private val classIds = new BidirectionalHashMap[Int, Class[_ <: ReplicatedGameObject]]
     for(p <- packages)
     {
@@ -39,8 +41,6 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
     {
         super.addObject(repObject)
 
-        recentCreations += repObject
-
         if(id < 0)
         {
             replicatedObjects.addPair(replicatedObjectIndex, repObject)
@@ -48,6 +48,8 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         }
         else
             replicatedObjects.addPair(id, repObject)
+
+        recentCreations.addPair(replicatedObjects.getKey(repObject), repObject)
 
         replicatedObjectIndex += 1
     }
@@ -66,9 +68,9 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         gameObject match
         {
             case repObject: ReplicatedGameObject =>
+                recentDeletions.addPair(replicatedObjects.getKey(repObject), repObject)
                 replicatedObjects.removePair(replicatedObjects.getKey(repObject), repObject)
                 if(localObjects.contains(repObject)) localObjects -= repObject
-                recentDeletions += repObject
             case _ =>
         }
     }
@@ -82,12 +84,12 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
 
     def writeCreateMessages(kryo: Kryo) =
     {
-        for(repObject <- recentCreations) yield
+        for((id, repObject) <- recentCreations) yield
         {
             objectOutputBuffer.clear()
             objectOutputBuffer.writeInt(classIds.getKey(repObject.getClass))
             repObject.write(objectOutputBuffer, kryo)
-            ReplicationMessage(CreateMessage, replicatedObjects.getKey(repObject), objectOutputBuffer.toBytes)
+            ReplicationMessage(CreateMessage, id, objectOutputBuffer.toBytes)
         }
     }
 
@@ -101,13 +103,13 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         }
     }
 
-    def writeDestroyMessages(kryo: Kryo) = for(repObject <- recentDeletions) yield ReplicationMessage(DestroyMessage, replicatedObjects.getKey(repObject), null)
+    def writeDestroyMessages(kryo: Kryo) = for((id, repObject) <- recentDeletions) yield ReplicationMessage(DestroyMessage, id, null)
 
-    def applyMessages(messages: Iterable[ReplicationMessage], kryo: Kryo)
+    def applyMessages(messages: Traversable[ReplicationMessage], kryo: Kryo)
     {
         for(message <- messages)
         {
-            objectInputBuffer.setBuffer(message.data)
+            if(message.data != null) objectInputBuffer.setBuffer(message.data)
             message.messageType match
             {
                 case CreateMessage =>

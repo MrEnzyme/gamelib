@@ -24,6 +24,12 @@ class BidirectionalHashMap[A, B] extends Traversable[(A, B)]
         BtoA.remove(b)
     }
 
+    def clear() =
+    {
+        AtoB.clear()
+        BtoA.clear()
+    }
+
     def foreach[C](f: ((A, B)) => C): Unit = AtoB.foreach(f)
 
     override def size = AtoB.size
