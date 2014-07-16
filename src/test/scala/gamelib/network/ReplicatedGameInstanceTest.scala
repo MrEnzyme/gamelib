@@ -7,29 +7,22 @@ class MockReplicatedGameObject extends ReplicatedGameObject
 {
     @replicate("a") var a = 5
 
-    def update(gameInstance: GameInstance, deltaTime: Double) =
-    {
-        a += 1
-        List()
-    }
-    def updateLocal(gameInstance: GameInstance, deltaTime: Double) =
-    {
-        a -= 1
-        List()
-    }
+    def update(gameInstance: GameInstance, deltaTime: Double) = List()
+    def updateLocal(gameInstance: GameInstance, deltaTime: Double) = List()
 }
 
 class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
 {
-    val gameInstance = new ReplicatedGameInstance("gamelib")
+    val hostInstance = new ReplicatedGameInstance("gamelib")
+	val clientInstance = new ReplicatedGameInstance("gamelib")
     val kryo = KryoRegistrar.makeNewKryo()
 
     test("tracks newly added ReplicatedGameObjects")
     {
         val repObject = new MockReplicatedGameObject
-        gameInstance.addObject(repObject)
+        hostInstance.addObject(repObject)
 
-        val messages = gameInstance.writeCreateMessages(kryo)
+        val messages = hostInstance.writeCreateMessages(kryo)
         assert(messages.size == 1)
         assert(messages.head.messageType == CreateMessage)
     }
@@ -37,44 +30,64 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
     test("replicates object creations")
     {
         val repObject = new MockReplicatedGameObject
-        gameInstance.addObject(repObject)
+        hostInstance.addObject(repObject)
 
-        val clientGameInstance = new ReplicatedGameInstance("gamelib")
-        val creationMessages = gameInstance.writeCreateMessages(kryo)
-        clientGameInstance.applyMessages(creationMessages, kryo)
-        clientGameInstance.update(0)
-        assert(clientGameInstance.getObjects.length == 1)
-        assert(clientGameInstance.getObjects.head.isInstanceOf[MockReplicatedGameObject])
-        assert(clientGameInstance.getObjects.head.asInstanceOf[MockReplicatedGameObject].a == 4)
+        val creationMessages = hostInstance.writeCreateMessages(kryo)
+        clientInstance.applyMessages(creationMessages, kryo)
+        clientInstance.update(0)
+        assert(clientInstance.getObjects.length == 1)
+        assert(clientInstance.getObjects.head.isInstanceOf[MockReplicatedGameObject])
+        assert(clientInstance.getObjects.head.asInstanceOf[MockReplicatedGameObject].a == 5)
     }
 
     test("replicates object deletions")
     {
         val repObject = new MockReplicatedGameObject
-        gameInstance.addObject(repObject)
+        hostInstance.addObject(repObject)
 
         //make a client and send the creation message to it
-        val clientGameInstance = new ReplicatedGameInstance("gamelib")
-        val creationMessages = gameInstance.writeCreateMessages(kryo)
-        clientGameInstance.applyMessages(creationMessages, kryo)
+        val creationMessages = hostInstance.writeCreateMessages(kryo)
+        clientInstance.applyMessages(creationMessages, kryo)
 
         //call update to add the object to the world
-        gameInstance.update(0)
-        clientGameInstance.update(0)
+        hostInstance.update(0)
+        clientInstance.update(0)
 
-        assert(clientGameInstance.getObjects.length == 1)
+        assert(clientInstance.getObjects.length == 1)
         repObject.setDead()
 
         //call update on the host to push out the object removal
-        gameInstance.update(0)
-        val destroyMessages = gameInstance.writeDestroyMessages(kryo)
+        hostInstance.update(0)
+        val destroyMessages = hostInstance.writeDestroyMessages(kryo)
 
         //client gets the destroy message and sets the object as dead
-        clientGameInstance.applyMessages(destroyMessages, kryo)
+        clientInstance.applyMessages(destroyMessages, kryo)
 
         //client cleans up the dead object during update
-        clientGameInstance.update(0)
+        clientInstance.update(0)
 
-        assert(clientGameInstance.getObjects.length == 0)
+        assert(clientInstance.getObjects.length == 0)
     }
+
+	test("replicates object updates")
+	{
+		val repObject = new MockReplicatedGameObject
+		hostInstance.addObject(repObject)
+
+		val creationMessages = hostInstance.writeCreateMessages(kryo)
+		clientInstance.applyMessages(creationMessages, kryo)
+
+		hostInstance.update(0)
+		clientInstance.update(0)
+
+		assert(clientInstance.getObjects.head.asInstanceOf[MockReplicatedGameObject].a == 5)
+
+		repObject.a = 10
+		repObject.updateFields("a")
+
+		val updateMessages = hostInstance.writeUpdateMessages(kryo)
+		clientInstance.applyMessages(updateMessages, kryo)
+
+		assert(clientInstance.getObjects.head.asInstanceOf[MockReplicatedGameObject].a == 10)
+	}
 }
