@@ -6,5 +6,5 @@ abstract class GameObject
     final def setDead() = dead = true
     final def isDead = dead
 
-    def update(deltaTime: Double)
+    def update(gameInstance: GameInstance, deltaTime: Double): Traversable[GameEvent]
 }

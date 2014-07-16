@@ -7,10 +7,9 @@ class ReplicationMessageTest extends FunSuite
 {
     test("kryo can serialize and read the class")
     {
-        val kryo = (new ScalaKryoInstantiator).newKryo()
-        kryo.register(classOf[ReplicationMessage])
+        val kryo = KryoRegistrar.makeNewKryo()
 
-        val writeMessage = ReplicationMessage(CreateMessage, Array[Byte](1,2,3,4))
+        val writeMessage = ReplicationMessage(CreateMessage, 1, Array[Byte](1,2,3,4))
         val out = new Output(64)
         kryo.writeObject(out, writeMessage)
         val readMessage = kryo.readObject(new Input(out.toBytes), classOf[ReplicationMessage])

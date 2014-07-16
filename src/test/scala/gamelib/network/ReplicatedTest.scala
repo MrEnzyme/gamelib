@@ -14,7 +14,7 @@ class ReplicatedTest extends FunSuite
         @replicate("double") var double: Double = 0.0
     }
 
-    val kryo = (new ScalaKryoInstantiator).newKryo()
+    val kryo = KryoRegistrar.makeNewKryo()
 
     test("read and write all fields to kryo streams")
     {

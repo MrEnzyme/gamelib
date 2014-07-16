@@ -6,4 +6,4 @@ case object CreateMessage extends MessageType
 case object UpdateMessage extends MessageType
 case object DestroyMessage extends MessageType
 
-case class ReplicationMessage(messageType: MessageType, data: Array[Byte])
+case class ReplicationMessage(messageType: MessageType, objectId: Int, data: Array[Byte])
