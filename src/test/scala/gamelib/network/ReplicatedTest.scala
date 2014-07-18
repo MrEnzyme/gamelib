@@ -1,7 +1,7 @@
 package gamelib.network
 
 import org.scalatest.FunSuite
-import com.twitter.chill.{Input, Output, ScalaKryoInstantiator}
+import com.twitter.chill.{Input, Output}
 
 class ReplicatedTest extends FunSuite
 {

@@ -22,7 +22,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
         val repObject = new MockReplicatedGameObject
         hostInstance.addObject(repObject)
 
-        val messages = hostInstance.writeCreateMessages(kryo)
+        val messages = hostInstance.getCreateMessages(kryo)
         assert(messages.size == 1)
         assert(messages.head.messageType == CreateMessage)
     }
@@ -32,7 +32,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
         val repObject = new MockReplicatedGameObject
         hostInstance.addObject(repObject)
 
-        val creationMessages = hostInstance.writeCreateMessages(kryo)
+        val creationMessages = hostInstance.getCreateMessages(kryo)
         clientInstance.applyMessages(creationMessages, kryo)
         clientInstance.update(0)
         assert(clientInstance.getObjects.length == 1)
@@ -46,7 +46,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
         hostInstance.addObject(repObject)
 
         //make a client and send the creation message to it
-        val creationMessages = hostInstance.writeCreateMessages(kryo)
+        val creationMessages = hostInstance.getCreateMessages(kryo)
         clientInstance.applyMessages(creationMessages, kryo)
 
         //call update to add the object to the world
@@ -58,7 +58,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
 
         //call update on the host to push out the object removal
         hostInstance.update(0)
-        val destroyMessages = hostInstance.writeDestroyMessages(kryo)
+        val destroyMessages = hostInstance.getDestroyMessages(kryo)
 
         //client gets the destroy message and sets the object as dead
         clientInstance.applyMessages(destroyMessages, kryo)
@@ -74,7 +74,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
 		val repObject = new MockReplicatedGameObject
 		hostInstance.addObject(repObject)
 
-		val creationMessages = hostInstance.writeCreateMessages(kryo)
+		val creationMessages = hostInstance.getCreateMessages(kryo)
 		clientInstance.applyMessages(creationMessages, kryo)
 
 		hostInstance.update(0)
@@ -85,7 +85,7 @@ class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
 		repObject.a = 10
 		repObject.updateFields("a")
 
-		val updateMessages = hostInstance.writeUpdateMessages(kryo)
+		val updateMessages = hostInstance.getUpdateMessages(kryo)
 		clientInstance.applyMessages(updateMessages, kryo)
 
 		assert(clientInstance.getObjects.head.asInstanceOf[MockReplicatedGameObject].a == 10)

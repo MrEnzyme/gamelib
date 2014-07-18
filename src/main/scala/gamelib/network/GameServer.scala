@@ -1,23 +1,47 @@
 package gamelib.network
 
-import com.esotericsoftware.kryonet.Server
+import com.esotericsoftware.kryonet.{Connection, Listener, Server}
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
-class GameServer extends Runnable
+class GameServer extends Server
 {
-    val networkingServer = new Server
+	private val instanceThreads = new ListBuffer[ReplicatedGameInstanceThread]
+	private val connectionInstances = new mutable.HashMap[Connection, ReplicatedGameInstanceThread]
 
-    def start() = new Thread(this, "GameServer").start()
-    def run()
-    {
-        val timePerFrame = 20L
-        while(true)
-        {
-            //get network input
+	private var instanceIndex = 0
 
-            //update game instance
+	KryoRegistrar.registerOnKryo(getKryo)
 
-            //get network output
+	private class ServerListener extends Listener
+	{
+		override def connected(connection: Connection)
+		{
+			val defaultInstance = instanceThreads.head
+			connectionInstances(connection) = defaultInstance
+			defaultInstance.addConnection(connection)
+		}
 
-        }
-    }
+		override def disconnected(connection: Connection)
+		{
+			connectionInstances(connection).removeConnection(connection)
+			connectionInstances.remove(connection)
+		}
+
+		override def received(connection: Connection, obj: Object) = obj match
+		{
+			case input: InputEvent => connectionInstances(connection).addInputEvent(input)
+			case _ =>
+		}
+	}
+
+	addListener(new ServerListener)
+
+	def addGameInstance(gameInstance: ReplicatedGameInstance)
+	{
+		val newThread = new ReplicatedGameInstanceThread(gameInstance, instanceIndex, getKryo)
+		instanceIndex += 1
+		instanceThreads += newThread
+		newThread.start()
+	}
 }
