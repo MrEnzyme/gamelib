@@ -1,5 +1,6 @@
 package gamelib.network
 
+import com.esotericsoftware.kryo.Kryo
 import com.twitter.chill.ScalaKryoInstantiator
 
 /**
@@ -10,7 +11,8 @@ object KryoRegistrar
     def makeNewKryo() =
     {
         val kryo = (new ScalaKryoInstantiator).newKryo()
-        kryo.register(classOf[ReplicationMessage])
+        registerOnKryo(kryo)
         kryo
     }
+    def registerOnKryo(kryo: Kryo) = kryo.register(classOf[ReplicationMessage])
 }
