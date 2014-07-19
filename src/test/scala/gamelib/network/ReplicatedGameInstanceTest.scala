@@ -1,15 +1,6 @@
 package gamelib.network
 
-import gamelib.core.GameInstance
 import org.scalatest.{OneInstancePerTest, FunSuite}
-
-class MockReplicatedGameObject extends ReplicatedGameObject
-{
-    @replicate("a") var a = 5
-
-    def update(gameInstance: GameInstance, deltaTime: Double) = List()
-    def updateLocal(gameInstance: GameInstance, deltaTime: Double) = List()
-}
 
 class ReplicatedGameInstanceTest extends FunSuite with OneInstancePerTest
 {

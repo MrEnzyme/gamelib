@@ -1,15 +1,13 @@
 package gamelib.network
 
-import com.esotericsoftware.kryonet.{Connection, Listener, Server}
+import com.esotericsoftware.kryonet.{KryoSerialization, Connection, Listener, Server}
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable
 
-class GameServer extends Server
+class GameServer extends Server(16384, 2048, new KryoSerialization(KryoRegistrar.makeNewKryo()))
 {
     private val instanceThreads = new ListBuffer[ReplicatedGameInstanceThread]
     private val connectionInstances = new mutable.HashMap[Connection, ReplicatedGameInstanceThread]
-
-    KryoRegistrar.registerOnKryo(getKryo)
 
     private class ServerListener extends Listener
     {

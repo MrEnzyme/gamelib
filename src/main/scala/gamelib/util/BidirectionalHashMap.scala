@@ -13,6 +13,9 @@ class BidirectionalHashMap[A, B] extends Traversable[(A, B)]
     def getValue(a: A) = AtoB(a)
     def getKey(b: B) = BtoA(b)
 
+    def hasKey(a: A) = AtoB.contains(a)
+    def hasValue(b: B) = BtoA.contains(b)
+
     def addPair(a: A, b: B)
     {
         AtoB(a) = b

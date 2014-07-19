@@ -4,5 +4,5 @@ import gamelib.core.{GameInstance, GameEvent, GameObject}
 
 abstract class ReplicatedGameObject extends GameObject with Replicated
 {
-    def updateLocal(gameInstance: GameInstance, deltaTime: Double): Traversable[GameEvent]
+    def updateLocal(gameInstance: GameInstance, deltaTime: Double): Traversable[GameEvent] = Nil
 }

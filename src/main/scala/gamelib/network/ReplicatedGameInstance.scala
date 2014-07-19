@@ -88,7 +88,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
 
     def getAllCreateMessages(kryo: Kryo) =
     {
-        for((id, repObject) <- replicatedObjects) yield
+        for((id, repObject) <- replicatedObjects; if objectIsLocal(repObject)) yield
         {
             objectOutputBuffer.clear()
             objectOutputBuffer.writeInt(classIds.getKey(repObject.getClass))
@@ -136,7 +136,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
                     val newObject = classIds.getValue(objectInputBuffer.readInt()).newInstance()
                     newObject.read(objectInputBuffer, kryo)
                     addObject(newObject, message.objectId)
-                case UpdateMessage => replicatedObjects.getValue(message.objectId).read(objectInputBuffer, kryo)
+                case UpdateMessage => if(replicatedObjects.hasKey(message.objectId)) replicatedObjects.getValue(message.objectId).read(objectInputBuffer, kryo)
                 case DestroyMessage => replicatedObjects.getValue(message.objectId).setDead()
             }
         }
