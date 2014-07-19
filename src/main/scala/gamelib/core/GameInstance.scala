@@ -12,7 +12,7 @@ class GameInstance
 
     protected val gameEvents = new ListBuffer[GameEvent]
 
-	private val inputState = new InputState
+    private val inputState = new InputState
 
     def addObject(newObject: GameObject) = newObjects.enqueue(newObject)
     protected def updateObject(gameObject: GameObject, deltaTime: Double): Traversable[GameEvent] = gameObject.update(this, deltaTime)
@@ -20,10 +20,10 @@ class GameInstance
 
     final def getObjects = gameObjects.toList
 
-	final def getKeyState(key: Char) = inputState.getKey(key)
-	final def getMouseButton(button: Int) = inputState.getMouseButton(button)
-	final def getMousePos = inputState.getMousePos
-	final def updateInputState(evt: InputEvent) = inputState.processInputEvent(evt)
+    final def getKeyState(key: Char) = inputState.getKey(key)
+    final def getMouseButton(button: Int) = inputState.getMouseButton(button)
+    final def getMousePos = inputState.getMousePos
+    final def updateInputState(evt: InputEvent) = inputState.processInputEvent(evt)
 
     def update(deltaTime: Double)
     {

@@ -31,7 +31,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
     private val objectOutputBuffer = new Output(128)
     private val objectInputBuffer = new Input(128)
 
-	final def objectIsLocal(repObject: ReplicatedGameObject) = localObjects.contains(repObject)
+    final def objectIsLocal(repObject: ReplicatedGameObject) = localObjects.contains(repObject)
 
     override def addObject(newObject: GameObject) = newObject match
     {
@@ -47,7 +47,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         {
             replicatedObjects.addPair(replicatedObjectIndex, repObject)
             localObjects += repObject
-			recentCreations.addPair(replicatedObjects.getKey(repObject), repObject)
+            recentCreations.addPair(replicatedObjects.getKey(repObject), repObject)
         }
         else
             replicatedObjects.addPair(id, repObject)
@@ -57,7 +57,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
 
     protected override def updateObject(gameObject: GameObject, deltaTime: Double) = gameObject match
     {
-        case repObject: ReplicatedGameObject => 
+        case repObject: ReplicatedGameObject =>
             if(localObjects.contains(repObject)) super.updateObject(repObject, deltaTime)
             else repObject.updateLocal(this, deltaTime)
         case _ => super.updateObject(gameObject, deltaTime)
@@ -70,10 +70,10 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         {
             case repObject: ReplicatedGameObject =>
                 if(objectIsLocal(repObject))
-				{
-					recentDeletions.addPair(replicatedObjects.getKey(repObject), repObject)
-					localObjects -= repObject
-				}
+                {
+                    recentDeletions.addPair(replicatedObjects.getKey(repObject), repObject)
+                    localObjects -= repObject
+                }
                 replicatedObjects.removePair(replicatedObjects.getKey(repObject), repObject)
             case _ =>
         }
@@ -114,16 +114,16 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         {
             objectOutputBuffer.clear()
             repObject.writeUpdate(objectOutputBuffer, kryo)
-			repObject.clearUpdates()
+            repObject.clearUpdates()
             ReplicationMessage(UpdateMessage, id, objectOutputBuffer.toBytes)
         }
     }
 
     def getDestroyMessages(kryo: Kryo) =
-	{
-		for((id, repObject) <- recentDeletions)
-			yield ReplicationMessage(DestroyMessage, id, null)
-	}
+    {
+        for((id, repObject) <- recentDeletions)
+        yield ReplicationMessage(DestroyMessage, id, null)
+    }
 
     def applyMessages(messages: Traversable[ReplicationMessage], kryo: Kryo)
     {
