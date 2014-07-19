@@ -17,6 +17,5 @@ object KryoRegistrar
     def registerOnKryo(kryo: Kryo)
     {
         kryo.register(classOf[ReplicationMessage])
-        kryo.register(classOf[StateUpdate])
     }
 }

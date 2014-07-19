@@ -13,7 +13,7 @@ class GameClient(gameInstance: ReplicatedGameInstance) extends Client(8192, 2048
         override def disconnected(connection: Connection) = gameThread.removeConnection(connection)
         override def received(connection: Connection, obj: Object) = obj match
         {
-            case s: StateUpdate => for(m <- s.replicationMessages) gameThread.putMessage(m)
+            case m: ReplicationMessage => gameThread.putMessage(m)
             case _ =>
         }
     }

@@ -15,7 +15,7 @@ class GameServer extends Server(16384, 2048, new KryoSerialization(KryoRegistrar
         {
             val defaultInstance = instanceThreads.head
             connectionInstances(connection) = defaultInstance
-            defaultInstance.addConnection(connection)
+            defaultInstance.addConnection(connection, sendCreations = true)
         }
 
         override def disconnected(connection: Connection)

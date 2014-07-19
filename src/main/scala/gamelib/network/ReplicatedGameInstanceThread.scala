@@ -14,10 +14,10 @@ class ReplicatedGameInstanceThread(gameInstance: ReplicatedGameInstance, kryo: K
     private val messages = new ListBuffer[ReplicationMessage]
     private val connections = new mutable.LinkedHashSet[Connection]
 
-    def addConnection(c: Connection)
+    def addConnection(c: Connection, sendCreations: Boolean = false)
     {
         connections += c
-        c.sendTCP(StateUpdate(gameInstance.getAllCreateMessages(kryo).toList))
+        if(sendCreations) for(m <- gameInstance.getAllCreateMessages(kryo)) c.sendTCP(m)
     }
     def removeConnection(c: Connection) = connections -= c
     def putMessage(m: ReplicationMessage) = messageInbox.add(m)
@@ -36,11 +36,9 @@ class ReplicatedGameInstanceThread(gameInstance: ReplicatedGameInstance, kryo: K
         messages.clear()
         messages ++= gameInstance.getCreateMessages(kryo)
         messages ++= gameInstance.getDestroyMessages(kryo)
-        val createDestroy = StateUpdate(messages.toList)
-        for(c <- connections) c.sendTCP(createDestroy)
+        for(m <- messages; c <- connections) c.sendTCP(m)
         messages.clear()
         messages ++= gameInstance.getUpdateMessages(kryo)
-        val updates = StateUpdate(messages.toList)
-        for(c <- connections) c.sendUDP(updates)
+        for(m <- messages; c <- connections) c.sendUDP(m)
     }
 }
