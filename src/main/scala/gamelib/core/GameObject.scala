@@ -1,6 +1,8 @@
 package gamelib.core
 
-abstract class GameObject
+import gamelib.ui.Renderable
+
+abstract class GameObject extends Renderable
 {
     private var dead = false
     final def setDead() = dead = true

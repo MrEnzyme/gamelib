@@ -24,7 +24,7 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
     private val classIds = new BidirectionalHashMap[Int, Class[_ <: ReplicatedGameObject]]
     for(p <- packages)
     {
-        val classes = new Reflections(p).getSubTypesOf(classOf[ReplicatedGameObject]).toList
+        val classes = new Reflections(p).getSubTypesOf(classOf[ReplicatedGameObject]).toList.sortWith(_.getName < _.getName)
         for(c <- classes) classIds.addPair(classIds.size, c)
     }
 

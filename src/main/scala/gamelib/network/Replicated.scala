@@ -44,5 +44,5 @@ trait Replicated
     final def writeUpdate(out: Output, kryo: Kryo) = for(field <- fields) if(fieldsToUpdate.contains(field)) writeField(out, kryo, field)
     final def read(in: Input, kryo: Kryo) = while(in.available > 0) fields(in.readByte()).readValue(in, kryo)
 
-    final def replicationNeeded = !fieldsToUpdate.isEmpty
+    final def replicationNeeded = fieldsToUpdate.nonEmpty
 }
