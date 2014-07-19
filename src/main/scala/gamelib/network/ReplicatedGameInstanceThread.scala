@@ -8,7 +8,7 @@ import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryonet.Connection
 import scala.collection.mutable
 
-class ReplicatedGameInstanceThread(gameInstance: ReplicatedGameInstance, instanceId: Int, kryo: Kryo) extends GameInstanceThread(gameInstance)
+class ReplicatedGameInstanceThread(gameInstance: ReplicatedGameInstance, kryo: Kryo) extends GameInstanceThread(gameInstance)
 {
 	private val messageInbox = new LinkedBlockingQueue[ReplicationMessage]
 	private val messages = new ListBuffer[ReplicationMessage]
@@ -32,11 +32,11 @@ class ReplicatedGameInstanceThread(gameInstance: ReplicatedGameInstance, instanc
 		messages.clear()
 		messages ++= gameInstance.getCreateMessages(kryo)
 		messages ++= gameInstance.getDestroyMessages(kryo)
-		val createDestroy = StateUpdate(instanceId, messages.toList)
+		val createDestroy = StateUpdate(messages.toList)
 		for(c <- connections) c.sendTCP(createDestroy)
 		messages.clear()
 		messages ++= gameInstance.getUpdateMessages(kryo)
-		val updates = StateUpdate(instanceId, messages.toList)
+		val updates = StateUpdate(messages.toList)
 		for(c <- connections) c.sendUDP(updates)
     }
 }

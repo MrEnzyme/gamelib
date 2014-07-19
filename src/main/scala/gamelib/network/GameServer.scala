@@ -9,8 +9,6 @@ class GameServer extends Server
 	private val instanceThreads = new ListBuffer[ReplicatedGameInstanceThread]
 	private val connectionInstances = new mutable.HashMap[Connection, ReplicatedGameInstanceThread]
 
-	private var instanceIndex = 0
-
 	KryoRegistrar.registerOnKryo(getKryo)
 
 	private class ServerListener extends Listener
@@ -39,8 +37,7 @@ class GameServer extends Server
 
 	def addGameInstance(gameInstance: ReplicatedGameInstance)
 	{
-		val newThread = new ReplicatedGameInstanceThread(gameInstance, instanceIndex, getKryo)
-		instanceIndex += 1
+		val newThread = new ReplicatedGameInstanceThread(gameInstance, getKryo)
 		instanceThreads += newThread
 		newThread.start()
 	}

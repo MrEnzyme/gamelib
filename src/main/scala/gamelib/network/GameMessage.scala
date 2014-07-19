@@ -4,7 +4,7 @@ import gamelib.util.math.Point
 
 abstract class GameMessage
 
-case class StateUpdate(instanceId: Int, replicationMessages: List[ReplicationMessage]) extends GameMessage
+case class StateUpdate(replicationMessages: List[ReplicationMessage]) extends GameMessage
 
 abstract class InputEvent extends GameMessage
 case class MouseMove(mousePos: Point) extends InputEvent

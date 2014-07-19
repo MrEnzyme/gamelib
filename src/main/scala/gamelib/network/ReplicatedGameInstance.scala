@@ -86,6 +86,17 @@ class ReplicatedGameInstance(packages: String*) extends GameInstance
         super.update(deltaTime)
     }
 
+    def getAllCreateMessages(kryo: Kryo) =
+    {
+        for((id, repObject) <- replicatedObjects) yield
+        {
+            objectOutputBuffer.clear()
+            objectOutputBuffer.writeInt(classIds.getKey(repObject.getClass))
+            repObject.write(objectOutputBuffer, kryo)
+            ReplicationMessage(CreateMessage, id, objectOutputBuffer.toBytes)
+        }
+    }
+
     def getCreateMessages(kryo: Kryo) =
     {
         for((id, repObject) <- recentCreations) yield
